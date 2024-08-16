@@ -7,15 +7,24 @@
 	const introElem = document.getElementById("intro")
 	const gridElem = document.getElementById("grid")
 
-	const SQRT2 = Math.sqrt(2)
-	
-
 	const cellSize = 128
 	const flipDuration = 1000
+	const gridRotation = 50
 
 	let cellList: GridCell[] = []
 
-	const introResizeObserver = new ResizeObserver(entries => {
+	function debounce(func: Function, wait: number = 100) {
+		let timeout: number
+
+		return (...args: any[]) => {
+			clearTimeout(timeout)
+			timeout = setTimeout(() => func(...args), wait)
+		}
+	}
+
+	const introResizeObserver = new ResizeObserver(debounce(handleIntroResize))
+
+	function handleIntroResize(entries: ResizeObserverEntry[]) {
 		const introRect = entries[0].contentRect
 		const introWidth = introRect.width
 		const introHeight = introRect.height
@@ -24,11 +33,39 @@
 
 		introElem?.style.setProperty("--cell-size", `${cellSize}px`)
 
-		const columnCount = Math.floor(introWidth / cellSize) + 2
-		const rowCount = Math.floor(introHeight / cellSize * 2 * SQRT2) + 2
+		introElem?.style.setProperty("--grid-rotation", `${gridRotation}deg`)
+
+		const columnCount = Math.ceil(introWidth / cellSize) + 1
+		const rowCount = Math.ceil((introHeight * 2 / cellSize) / Math.cos(gridRotation * Math.PI / 180)) + 1
 
 		const middleX = Math.floor(columnCount / 2)
 		const middleY = Math.floor(rowCount / 2)
+
+		const rodrigoLineup = new SkippingLineup([
+			new SkippingImg("/brand-1-R.webp", -10),
+			new SkippingImg("/brand-2-o.webp", -40),
+			new SkippingImg("/brand-3-d.webp", -30),
+			new SkippingImg("/brand-4-r.webp", -50),
+			new SkippingImg("/brand-5-i.webp", -135),
+			new SkippingImg("/brand-6-g.webp", -100),
+			new SkippingImg("/brand-7-o.webp", -20),
+		], 0.33, 100)
+
+		const calabriaLineup = new SkippingLineup([
+			new SkippingImg("/brand-8-C.webp", -45),
+			new SkippingImg("/brand-9-a.webp", -50),
+			new SkippingImg("/brand-10-l.webp", -100),
+			new SkippingImg("/brand-11-a.webp", -100),
+			new SkippingImg("/brand-12-b.webp", -20),
+			new SkippingImg("/brand-13-r.webp", -55),
+			new SkippingImg("/brand-14-i.webp", -140),
+			new SkippingImg("/brand-15-a.webp", -100),
+		], 0.33, 100)
+
+		
+		// const fullstackLineup = new SkippingLineup([
+		// 	new SkippingImg("/text-fs.webp", -65, -850),
+		// ], 0.33, 100)
 
 		cellList = []
 
@@ -50,17 +87,15 @@
 
 					if(r == middleY+1 && c == middleX-1) {	
 						cell = new GridCell({type: "button", iconName: "github", action: () => window.open("https://github.com/Rodrigovicente")})				
-					} else if(r == middleY+2 && c == middleX) {	
+					} else if(r == middleY+2 && c == middleX-1) {	
 						cell = new GridCell({type: "button", iconName: "linkedin", action: () => window.open("https://www.linkedin.com/in/rodrigovcalabria/")})			
 					} else if(r == middleY+3 && c == middleX) {	
 						cell = new GridCell({type: "button", iconName: "mail", action: () => window.open("mailto:rodrigovcabria@hotmail.com")})				
-					} else if(r == middleY+4 && c == middleX+1) {	
+					} else if(r == middleY+4 && c == middleX) {	
 						cell = new GridCell({type: "button", iconName: "resume", action: () => window.open("https://github.com/Rodrigovicente")})				
 					} 
-					
-					// else if(r == middleY-3 && c == middleX) {
-					// 	cell = new GridCell({type: "display", displayImage: "display-rodrigo.webp", offsetX: 0})				
-					// } else if(r == middleY-2 && c == middleX+1) {	
+
+					//else if(r == middleY-2 && c == middleX+1) {	
 					// 	cell = new GridCell({type: "display", displayImage: "display-rodrigo.webp", offsetX: 1})				
 					// } else if(r == middleY-1 && c == middleX+1) {	
 					// 	cell = new GridCell({type: "display", displayImage: "display-rodrigo.webp", offsetX: 2})				
@@ -68,8 +103,29 @@
 					// 	cell = new GridCell({type: "display", displayImage: "display-rodrigo.webp", offsetX: 3})				
 					// }
 					
-					 else if(r == middleY && c == middleX-1) {
+					else if(r == middleY && c == middleX-2) {
 						cell = new GridCell({standingText: "Full-Stack Dev"})
+						// cell = new GridCell({skippingLineup: fullstackLineup})
+					}
+					
+					else if(r == middleY-3 && c == middleX) {
+						cell = new GridCell({type: "static", skippingLineup: rodrigoLineup})
+					} else if(r == middleY-2 && c == middleX) {
+						cell = new GridCell({type: "static"})
+					} else if(r == middleY-1 && c == middleX+1) {
+						cell = new GridCell({type: "static"})
+					} else if(r == middleY && c == middleX+1) {
+						cell = new GridCell({type: "static"})
+					}
+
+					else if(r == middleY-1 && c == middleX) {
+						cell = new GridCell({type: "static", skippingLineup: calabriaLineup})
+					} else if(r == middleY && c == middleX) {
+						cell = new GridCell({type: "static"})
+					} else if(r == middleY+1 && c == middleX+1) {
+						cell = new GridCell({type: "static"})
+					} else if(r == middleY+2 && c == middleX+1) {
+						cell = new GridCell({type: "static"})
 					}
 					
 					else {
@@ -92,7 +148,7 @@
 		}
 
 
-	})
+	}
 
 	if(introElem) {
 		introResizeObserver.observe(introElem)
@@ -101,7 +157,7 @@
 
 	type GridCellConstructorArgsBase = {
 		standingText?: string
-		skippingText?: string
+		skippingLineup?: SkippingLineup
 		type?: never
 		iconName?: never
 		action?: never
@@ -110,9 +166,15 @@
 		displayImage?: never
 	}
 
+	type GridCellConstructorArgsStatic = {
+		standingText?: string
+		skippingLineup?: SkippingLineup
+		type: "static"
+	}
+
 	type GridCellConstructorArgsButton = {
 		standingText?: string
-		skippingText?: string
+		skippingLineup?: SkippingLineup
 		type: "button"
 		iconName: string
 		action: () => void
@@ -120,7 +182,7 @@
 	
 	type GridCellConstructorArgsDisplay = {
 		standingText?: string
-		skippingText?: string
+		skippingLineup?: SkippingLineup
 		type: "display"
 		offsetX: number
 		offsetY?: number
@@ -130,6 +192,7 @@
 	
 	type GridCellConstructorArgs = 
 	GridCellConstructorArgsBase
+	| GridCellConstructorArgsStatic
 	| GridCellConstructorArgsButton
 	| GridCellConstructorArgsDisplay
 	| undefined
@@ -139,6 +202,7 @@
 		isFlipped = false
 		isFlipping = false
 		isInverted = false
+		type: "static" | "button" | "display" | undefined
 		target: HTMLDivElement | HTMLButtonElement
 
 		targetInner: HTMLDivElement | null = null
@@ -148,7 +212,11 @@
 
 		constructor(args?: GridCellConstructorArgs) {
 
-			if(args?.type === "button") {
+			if(args?.type === "static") {
+				this.type = "static"
+				this.target = document.createElement("div")
+
+			} else if(args?.type === "button") {
 				if(args.iconName == null) throw new Error("Icon name is required for button")
 				this.target = document.createElement("button")
 				this.target.classList.add("grid-wrapper")
@@ -156,7 +224,7 @@
 
 				const targetInner = document.createElement("div")
 				targetInner.classList.add("inner-content")
-				targetInner.style.setProperty("--bg-url", `url("/public/icon-${args.iconName}.webp")`)
+				targetInner.style.setProperty("--bg-url", `url("/icon-${args.iconName}.webp")`)
 				this.target.appendChild(targetInner)
 				this.target.addEventListener("pointerenter", (e) => this.flip(e, true))
 				this.target.addEventListener("pointerleave", (e) => this.flip(e, false))
@@ -172,7 +240,7 @@
 				const targetInner = document.createElement("div")
 				targetInner.classList.add("inner-content")
 				targetInner.classList.add("cell-display")
-				targetInner.style.setProperty("--bg-url", `url("/public/${args.displayImage}")`)
+				targetInner.style.setProperty("--bg-url", `url("/${args.displayImage}")`)
 				targetInner.style.setProperty("--bg-offsetX", `-${args.offsetX * 128}px`)
 				if(args.offsetY)targetInner.style.setProperty("--bg-offsetY", `-${args.offsetY * 128}px`)
 				else targetInner.style.setProperty("--bg-offsetY", `0px`)
@@ -195,9 +263,14 @@
 				this.target.appendChild(standingText)
 			}
 			
+			if(args?.skippingLineup) {
+				this.target.appendChild(args.skippingLineup.wrapper)
+			}
+			
 		}
 
 		flip = (e?: PointerEvent, isFlipped?: boolean) => {
+			if(this.type === "static") return
 			if((this.isFlipping || this.target == null) && this.targetInner == null) return
 
 			if(isFlipped != null) {
@@ -269,36 +342,191 @@
 			}
 		},
 		start: function () {
-			console.log('starting')
 			if(this.isRunning) return
 			this.isRunning = true
 			this.flipNext()
 		},
 		stop: function () {
-			console.log('stopping')
 			this.isRunning = false
 			if(this.timeout) clearTimeout(this.timeout)
 		}
-
 	}
 
-	
+	window.addEventListener("blur", () => autoFlip.stop())
+	window.addEventListener("focus", () => autoFlip.start())
 	autoFlip.start()
 
+	const pointer = document.getElementById("pointer")
+
+
+	type LineUpImgData = {
+		src: string
+		offsetX?: number
+		offsetY?: number
+	}
+
+	class SkippingLineup {
+
+		wrapper: HTMLDivElement
+		radius: number
+		imgList: SkippingImg[] = []
+
+		/* pointerTracker?: { x: number, y: number, speed: number } = undefined
+		pointer?: { x: number, y: number } = undefined */
+
+		constructor(skippingImgList: SkippingImg[], scale: number = 1, radius?: number) {
+
+			this.radius = radius ?? cellSize
+
+			this.wrapper = document.createElement("div")
+			this.wrapper.classList.add("lineup-wrapper")
+
+			if(scale !== 1) this.wrapper.style.setProperty("--lineup-scale", `${scale}`)
+
+			for(let i = 0; i < skippingImgList.length; i++) {
+
+				this.wrapper.appendChild(skippingImgList[i].img)
+				skippingImgList[i].setRadius(this.radius)
+				this.imgList.push(skippingImgList[i])
+			}
+
+			introElem?.addEventListener("pointermove", (e: PointerEvent) => {
+
+				this.setPointerPosition(e.clientX, e.clientY)
+			})
+
+		}
+
+		
+		setPointerPosition(pointerX: number, pointerY: number) {
+			for(let i = 0; i < this.imgList.length; i++) {
+				this.imgList[i].updatePointerPosition(pointerX, pointerY)
+			}
+		}
+		
+		/*
+		animateTracker = () => {
+			if(!this.pointer) this.pointer = { x: 0, y: 0 }
+
+			if(!this.pointerTracker) this.pointerTracker = {
+				x: this.pointer.x,
+				y: this.pointer.y,
+				speed: 0.05
+			}
+
+			const trackerDist = {
+				x: Math.abs(this.pointerTracker.x - this.pointer.x),
+				y: Math.abs(this.pointerTracker.y - this.pointer.y)
+			}
+
+			if(trackerDist.x > 1 && trackerDist.y > 1) {
+				const distX: number = (this.pointer.x - this.pointerTracker.x)
+				const distY: number = (this.pointer.y - this.pointerTracker.y)
+
+				this.pointerTracker.x += distX * this.pointerTracker.speed
+				this.pointerTracker.y += distY * this.pointerTracker.speed
+			}
+
+			if(pointer) {
+				pointer.style.left = `${this.pointerTracker.x}px`
+				pointer.style.top = `${this.pointerTracker.y}px`
+			}
+			
+			this.setPointerPosition(this.pointerTracker.x, this.pointerTracker.y)
+
+			requestAnimationFrame(this.animateTracker)
+		}
+		*/
+	}
+
+	class SkippingImg {
+
+		img: HTMLImageElement
+		radius: number
+
+		imgRect?: {x: number, y: number} = undefined
+
+		offsetZ = 0
+		pointerDist
+		skipSpeed = 0.2
+
+		constructor(src: string, offsetX?: number, offsetY?: number, radius?: number) {
+			this.radius = radius ?? cellSize			
+			this.pointerDist = this.radius + 1
+
+			this.img = document.createElement("img")
+			this.img.src = src
+			if(offsetX) this.img.style.setProperty("--lineup-img-offsetX", `${offsetX}px`)
+			if(offsetY) this.img.style.setProperty("--lineup-img-offsetY", `${offsetY}px`)
+
+			this.animateSkip()
+		}
+
+		setRadius(radius: number) {
+			this.radius = radius
+		}
+
+		updatePointerPosition = (pointerX: number, pointerY: number) => {
+			if(!this.imgRect) {
+				const imgBoundingClientRect = this.img.getBoundingClientRect()
+				this.imgRect = {
+					y: imgBoundingClientRect.top + imgBoundingClientRect.height / 2,
+					x: imgBoundingClientRect.left + imgBoundingClientRect.width / 2
+				}
+			}
+
+			const distanceX = pointerX - this.imgRect.x
+			const distanceY = pointerY - this.imgRect.y
+			this.pointerDist = Math.sqrt(distanceX ** 2 + distanceY ** 2)
+
+			// if(this.pointerDist < this.radius) {
+			// 	this.offsetZ = this.radius - this.pointerDist
+			// }
+		}
+
+		animateSkip() {
+
+			const offsetGoal = Math.max(0, this.radius - this.pointerDist)
+
+			const offsetDist = offsetGoal - this.offsetZ
+
+			if(Math.abs(offsetDist) > 0.001) {
+				this.offsetZ += offsetDist * this.skipSpeed
+				// if(this.img.src.endsWith("upper.webp")) console.log(this.offsetZ)
+
+				this.img.style.setProperty("--lineup-img-offsetZ", `${this.offsetZ}px`)
+			}
+
+			requestAnimationFrame(this.animateSkip.bind(this))
+		}
+	}
 	
 </script>
 
 <div id="intro">
 	<div id="grid">
 	</div>
+	<!-- <div id="pointer"></div> -->
 </div>
 
 <style>
+	#pointer {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 10px;
+		height: 10px;
+		background-color: red;
+		z-index: 100;
+		border-radius: 50%;
+		transform: translateZ(100px);
+
+	}
 	#intro {
 
 		--cell-size: 128px;
 		--cell-border-color: 211, 211, 211;
-		--cell-image: url("/public/cellBg3.png");
+		--cell-image: url("/cellBg3.png");
 
 		--flip-duration: 1s;
 
@@ -307,7 +535,7 @@
 
 		--gap-color: #bbbbbb;
 
-
+		position: relative;
 		width: 100%;
 		height: 100dvh;
 		background-color: rgb(245, 245, 245);
@@ -319,7 +547,7 @@
 			grid-template-columns: 1fr;
 			/* transform: rotateX(45deg) rotateZ(45deg); */
 			transform-origin: top center;
-			transform: rotateX(45deg);
+			transform: rotateX(var(--grid-rotation, 50deg));
 			transform-style: preserve-3d;
 			/* background-color: rgba(0, 0, 0, 0.103); */
 
@@ -334,6 +562,7 @@
 			} */
 
 			.grid-row {
+				/* outline: solid 1px green; */
 
 				display: grid;
 				position: relative;
@@ -398,7 +627,7 @@
 						position: absolute;
 						width: 100%;
 						height: 100%;
-						background: url("/public/cellBg.png") repeat center center;
+						background: url("/cellBg.png") repeat center center;
 						background-size: cover;
 						background-color: rgb(133, 133, 133);
 						transition: transform 0.5s;
@@ -517,8 +746,32 @@
 						font-weight: bold;
 						text-wrap: nowrap;
 
+						text-shadow: -2px -2px 0rem rgb(180, 180, 180);
+										/* -4px -4px 0rem rgb(180, 180, 180); */
+
 						transform-origin: bottom left;
 						transform: translateZ(-8px) rotateX(-90deg) rotateY(90deg);
+					}
+
+					& > .lineup-wrapper {
+						position: absolute;
+						display: flex;
+						flex-wrap: nowrap;
+						top: 0;
+						left: 0;
+						pointer-events: none;
+						transform: translateZ(1px) scale(var(--lineup-scale, 1));
+						transform-origin: top left;
+						transform-style: preserve-3d;
+
+						& > img {
+							position: relative;						
+							top: var(--lineup-img-offsetY, 0);
+							margin-left: var(--lineup-img-offsetX, 0);
+							/* transition: transform 0.5s, filter 0.5s; */
+							transform: translateZ(var(--lineup-img-offsetZ, 0));
+							filter: drop-shadow(calc(var(--lineup-img-offsetZ, 0) * 3.6) calc(var(--lineup-img-offsetZ, 0) * 3.6) calc(var(--lineup-img-offsetZ, 0) / 2) #0000002f);
+						}
 					}
 				}
 
