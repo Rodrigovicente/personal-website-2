@@ -38,8 +38,10 @@
 		const columnCount = Math.ceil(introWidth / cellSize) + 1
 		const rowCount = Math.ceil((introHeight * 2 / cellSize) / Math.cos(gridRotation * Math.PI / 180)) + 1
 
-		const middleX = Math.floor(columnCount / 2)
-		const middleY = Math.floor(rowCount / 2)
+		let middleX = Math.floor(columnCount / 2)
+		let middleY = Math.floor(rowCount / 2)
+
+		if(middleY % 2 === 1) middleY -= 1
 
 		const rodrigoLineup = new SkippingLineup([
 			new SkippingImg("/brand-1-R.webp", -10),
@@ -86,13 +88,13 @@
 					let cell
 
 					if(r == middleY+1 && c == middleX-1) {	
-						cell = new GridCell({type: "button", iconName: "github", action: () => window.open("https://github.com/Rodrigovicente")})				
+						cell = new GridCell({type: "button", iconName: "github", standingText: "Github", action: () => window.open("https://github.com/Rodrigovicente")})				
 					} else if(r == middleY+2 && c == middleX-1) {	
-						cell = new GridCell({type: "button", iconName: "linkedin", action: () => window.open("https://www.linkedin.com/in/rodrigovcalabria/")})			
+						cell = new GridCell({type: "button", iconName: "linkedin", standingText: "Linkedin", action: () => window.open("https://www.linkedin.com/in/rodrigovcalabria/")})			
 					} else if(r == middleY+3 && c == middleX) {	
-						cell = new GridCell({type: "button", iconName: "mail", action: () => window.open("mailto:rodrigovcabria@hotmail.com")})				
+						cell = new GridCell({type: "button", iconName: "mail", standingText: "Contact", action: () => window.open("mailto:rodrigovcabria@hotmail.com")})				
 					} else if(r == middleY+4 && c == middleX) {	
-						cell = new GridCell({type: "button", iconName: "resume", action: () => window.open("https://github.com/Rodrigovicente")})				
+						cell = new GridCell({type: "button", iconName: "resume", standingText: "Resume", action: () => window.open("https://github.com/Rodrigovicente")})				
 					} 
 
 					//else if(r == middleY-2 && c == middleX+1) {	
@@ -259,7 +261,19 @@
 			if(args?.standingText) {
 				const standingText = document.createElement("div")
 				standingText.classList.add("standing-text")
-				standingText.innerText = args.standingText
+
+				if(args.type === 'button') {
+					for(let i = 0; i < args.standingText.length; i++) {
+						const span = document.createElement("span")
+						span.innerText = args.standingText[i]
+						span.style.transitionDelay = `${i * 0.05 + 0.5}s`
+						standingText.appendChild(span)
+					}
+
+				} else {
+					standingText.innerText = args.standingText
+
+				}
 				this.target.appendChild(standingText)
 			}
 			
@@ -686,6 +700,7 @@
 							height: 100%;
 							top: 0;
 							left: 0;
+							pointer-events: none;
 
 							&::before,
 							&::after {
@@ -770,7 +785,7 @@
 							margin-left: var(--lineup-img-offsetX, 0);
 							/* transition: transform 0.5s, filter 0.5s; */
 							transform: translateZ(var(--lineup-img-offsetZ, 0));
-							filter: drop-shadow(calc(var(--lineup-img-offsetZ, 0) * 3.6) calc(var(--lineup-img-offsetZ, 0) * 3.6) calc(var(--lineup-img-offsetZ, 0) / 2) #0000002f);
+							filter: drop-shadow(calc(var(--lineup-img-offsetZ, 0) * 3.6) calc(var(--lineup-img-offsetZ, 0) * 3.6) calc(var(--lineup-img-offsetZ, 0) * 0.7) #0000002f);
 						}
 					}
 				}
@@ -780,6 +795,29 @@
 
 					& > .inner-content {
 						transition: transform 0.6s;
+					}
+
+					& > .standing-text {
+						width: 100%;
+						transform-style: preserve-3d;
+						text-transform: uppercase;
+						font-size: 1.7rem;
+						text-align: center;
+						font-weight: 300;
+						text-shadow: 2px -2px 0rem rgb(180, 180, 180);
+						transform: translateZ(-8px) rotateX(-90deg) rotateY(0deg);
+						
+						& > span {
+							opacity: 0;
+							display: inline-block;
+							transition: transform 0.4s, opacity 0.4s;
+							transform: translateY(3rem);
+						}
+					}
+
+					&:hover > .standing-text > span {
+						opacity: 1;
+						transform: translateY(-8px);
 					}
 				}
 			}
