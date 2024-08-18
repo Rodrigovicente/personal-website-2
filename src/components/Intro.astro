@@ -5,6 +5,7 @@
 <script>
 	
 	const introElem = document.getElementById("intro")
+	const introContentElem = introElem?.getElementsByClassName("intro-content")[0] as HTMLDivElement
 	const gridElem = document.getElementById("grid")
 
 	const cellSize = 128
@@ -21,6 +22,8 @@
 			timeout = setTimeout(() => func(...args), wait)
 		}
 	}
+
+	introElem?.style.setProperty("--flip-duration", `${flipDuration/1000}s`)
 
 	const introResizeObserver = new ResizeObserver(debounce(handleIntroResize))
 
@@ -133,7 +136,7 @@
 					else {
 						cell = new GridCell()
 						// if(Math.random() > 0.5) cell.setFlipped()
-						if(Math.random() > 0.5) cell.flip()
+						if(Math.random() > 0.5) cell.setFlipped()
 					}
 
 					row.appendChild(cell.target)					
@@ -153,8 +156,8 @@
 
 	}
 
-	if(introElem) {
-		introResizeObserver.observe(introElem)
+	if(introContentElem) {
+		introResizeObserver.observe(introContentElem)
 	}
 
 
@@ -327,10 +330,13 @@
 
 			this.isFlipped = isFlipped ?? !this.isFlipped
 
-			if(this.isFlipped)
+			if(this.isFlipped){
 				this.target.classList.add("flipped")
-			else
+				this.target.classList.add("inverted")
+			} else {
 				this.target.classList.remove("flipped")
+				this.target.classList.remove("inverted")
+			}
 		}
 	}
 
@@ -396,7 +402,7 @@
 				this.imgList.push(skippingImgList[i])
 			}
 
-			introElem?.addEventListener("pointermove", (e: PointerEvent) => {
+			introContentElem?.addEventListener("pointermove", (e: PointerEvent) => {
 
 				this.setPointerPosition(e.clientX, e.clientY)
 			})
@@ -520,24 +526,14 @@
 </script>
 
 <div id="intro">
-	<div id="grid">
+	<div class="intro-content">
+		<div id="grid">
+		</div>
 	</div>
-	<!-- <div id="pointer"></div> -->
 </div>
 
 <style>
-	#pointer {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 10px;
-		height: 10px;
-		background-color: red;
-		z-index: 100;
-		border-radius: 50%;
-		transform: translateZ(100px);
 
-	}
 	#intro {
 
 		--cell-size: 128px;
@@ -550,295 +546,330 @@
 		--half-sqrt: 0.70710678118;
 		--half-hip: calc(var(--cell-size) * var(--half-sqrt));
 
-		--cell-color: #f7f7f7;
+		--cell-color: 247, 247, 247;
+		--cell-color-shade: 237, 237, 237;
 
-		position: relative;
-		width: 100%;
-		height: 100dvh;
-		max-width: 1920px;
-		max-height: 1080px;
-		margin: 0 auto;
-		background-color: rgb(240, 240, 240);
-		overflow: hidden;
+		background-color: rgb(var(--cell-color));
 
-		&::after {
-			content: "";
-			pointer-events: none;
-			z-index: 2;
-			display: block;
-			position: absolute;
-			top: 0;
-			left: 0;
+		& > .intro-content {
+
+			position: relative;
 			width: 100%;
-			height: 100%;
-			background: radial-gradient(circle, rgba(255,255,255,0) 60%, rgba(255,255,255,1) 93%);
-		}
+			height: 100dvh;
+			max-width: 1920px;
+			max-height: 2160px;
+			margin: 0 auto;
+			background-color: rgb(240, 240, 240);
+			overflow: hidden;
 
-		#grid {
-			display: grid;
-			width: 100%;
-			grid-template-columns: 1fr;
-			/* transform: rotateX(45deg) rotateZ(45deg); */
-			transform-origin: top center;
-			transform: rotateX(var(--grid-rotation, 50deg));
-			transform-style: preserve-3d;
-			/* background-color: rgba(0, 0, 0, 0.103); */
-
-			/* &::before {
+			&::after {
 				content: "";
+				pointer-events: none;
+				z-index: 2;
 				display: block;
 				position: absolute;
+				top: 0;
+				left: 0;
 				width: 100%;
 				height: 100%;
-				background-color: rgb(248, 248, 248);
-				transform: translateZ(calc(var(--cell-size) * -1));
-			} */
+				background: radial-gradient(circle, rgba(var(--cell-color),0) 60%, rgba(var(--cell-color),1) 93%);
+			}
 
-			.grid-row {
-				/* outline: solid 1px green; */
-
+			#grid {
 				display: grid;
-				position: relative;
-				grid-auto-flow: column;
-				grid-template-columns: repeat(auto-fit, var(--cell-size));
+				width: 100%;
+				grid-template-columns: 1fr;
+				/* transform: rotateX(45deg) rotateZ(45deg); */
+				transform-origin: top center;
+				transform: rotateX(var(--grid-rotation, 50deg));
 				transform-style: preserve-3d;
-				pointer-events: none;
+				/* background-color: rgba(0, 0, 0, 0.103); */
 
-				margin-top: calc(var(--cell-size) / -2);
-				&:nth-child(even) {
-					left: calc(var(--cell-size) / -2);
+				/* &::before {
+					content: "";
+					display: block;
+					position: absolute;
+					width: 100%;
+					height: 100%;
+					background-color: rgb(248, 248, 248);
+					transform: translateZ(calc(var(--cell-size) * -1));
+				} */
 
-					.grid-cell {
-
-						
-						&:not(.grid-wrapper):after,
-						&.grid-wrapper > .inner-content {
-							background-position: top left;
-						}
-					
-						&.inverted:not(.grid-wrapper):after,
-						&.inverted.grid-wrapper > .inner-content {						
-							background-position: top right;
-						}
-					}
-				}
-				
-
-				.grid-cell {
-					pointer-events: auto;
+				.grid-row {
 					/* outline: solid 1px green; */
-					aspect-ratio: 1 / 1;
+
+					display: grid;
+					position: relative;
+					grid-auto-flow: column;
+					grid-template-columns: repeat(auto-fit, var(--cell-size));
 					transform-style: preserve-3d;
-					transform: rotateZ(45deg);
-					scale: var(--half-sqrt);
-					padding: 0;
-					margin: 0;
-					border: solid 1px var(--cell-border-color);
-					box-shadow: inset 5px 5px 10px rgba(0,0,0,0.05);
+					pointer-events: none;
 
+					margin-top: calc(var(--cell-size) / -2);
+					&:nth-child(even) {
+						left: calc(var(--cell-size) / -2);
 
-					&:not(.grid-wrapper):after,
-					&.grid-wrapper > .inner-content {
-						content: "";
-						display: block;
-						position: absolute;
-						width: 100%;
-						height: 100%;
-						background: var(--cell-image) no-repeat top right;
-						background-size: cover;
-						background-color: var(--cell-color);
-						transition: transform var(--flip-duration);
-						transform: rotateY(0deg);
-						/* outline: solid 1px green; */
+						.grid-cell {
+
+							
+							&:not(.grid-wrapper):after,
+							&.grid-wrapper > .inner-content {
+								background-position: top left;
+							}
 						
-						outline: solid 1px rgba(var(--cell-flipping-border-color), 0);
-					}
-					
-					/* &::before {
-						content: "";
-						display: block;
-						position: absolute;
-						width: 100%;
-						height: 100%;
-						background: url("/cellBg.png") repeat center center;
-						background-size: cover;
-						background-color: rgb(133, 133, 133);
-						transition: transform 0.5s;
-						transform: rotateY(0deg) translateZ(-1px);
-						/* outline: solid 1px green; 
-					} */
-
-					&.flipping:not(.grid-wrapper):after,
-					&.flipping.grid-wrapper > .inner-content {						
-						outline: solid 1px rgba(var(--cell-flipping-border-color), 1);
-					}
-					
-					&.inverted:not(.grid-wrapper):after,
-					&.inverted.grid-wrapper > .inner-content {
-						background-position: top left;
-					}
-
-					&.flipped:not(.grid-wrapper):after,
-					&.flipped.grid-wrapper > .inner-content {	
-						transform: rotateY(180deg);
-					}
-					/* &.flipped::before {
-						/* background-color: rgb(175, 214, 240); 
-						transform: rotateY(180deg) translateZ(-1px);
-					} */
-
-					&.grid-wrapper {
-						outline: solid 2px rgba(255, 0, 0, 0);
-						background-color: transparent;
-						transition: outline-color 0.8s;
-
-						&::after {
-							content: "";
-							position: absolute;
-							top: 0;
-							left: 0;
-							width: 100%;
-							height: 100%;
-							transition: box-shadow 0.8s;
-							transition-delay: 0s;
-							box-shadow: inset 5px 0 0px 2px rgba(0, 0, 0, 0);
-						}
-
-						&:hover {
-							outline-color:rgba(200, 200, 200, 1);
-
-							&:after {
-								transition-delay: 0.8s;
-								box-shadow: inset 0 0 35px 0px rgba(0, 0, 0, 0.1);
+							&.inverted:not(.grid-wrapper):after,
+							&.inverted.grid-wrapper > .inner-content {						
+								background-position: top right;
 							}
 						}
+					}
+					
 
-						& > .inner-content {
-							transform-style: preserve-3d;
+					.grid-cell {
+						pointer-events: auto;
+						/* outline: solid 1px green; */
+						min-width: var(--cell-size);
+						aspect-ratio: 1 / 1;
+						transform-style: preserve-3d;
+						transform: rotateZ(45deg);
+						scale: var(--half-sqrt);
+						padding: 0;
+						margin: 0;
+						border: solid 1px var(--cell-border-color);
+						box-shadow: inset 5px 5px 10px rgba(0,0,0,0.05);
+
+
+						&:not(.grid-wrapper):after,
+						&.grid-wrapper > .inner-content {
+							content: "";
+							display: block;
+							position: absolute;
 							width: 100%;
 							height: 100%;
-							top: 0;
-							left: 0;
-							pointer-events: none;
+							background: var(--cell-image) no-repeat top right;
+							background-size: cover;
+							background-color: rgb(var(--cell-color));
+							transition: transform var(--flip-duration),
+											outline-color calc(var(--flip-duration) / 2);
+							transform: rotateY(0deg);
+							/* outline: solid 1px green; */
+							
+							outline: solid 1px rgba(var(--cell-flipping-border-color), 0);
+						}
+						
+						/* &::before {
+							content: "";
+							display: block;
+							position: absolute;
+							width: 100%;
+							height: 100%;
+							background: url("/cellBg.png") repeat center center;
+							background-size: cover;
+							background-color: rgb(133, 133, 133);
+							transition: transform 0.5s;
+							transform: rotateY(0deg) translateZ(-1px);
+							/* outline: solid 1px green; 
+						} */
 
-							&::before,
+						&.flipping:not(.grid-wrapper):after,
+						&.flipping.grid-wrapper > .inner-content {						
+							outline: solid 1px rgba(var(--cell-flipping-border-color), 1);
+							background-color: rgb(var(--cell-color));
+							transition: transform var(--flip-duration),
+											outline-color calc(var(--flip-duration) / 2),
+											background-color var(--flip-duration);
+						}
+						
+						&.inverted:not(.grid-wrapper):after,
+						&.inverted.grid-wrapper > .inner-content {
+							background-position: top left;
+						}
+
+						&.flipped:not(.grid-wrapper):after,
+						&.flipped.grid-wrapper > .inner-content {	
+							transform: rotateY(180deg);
+						}
+						
+
+						&.flipped.flipping:not(.grid-wrapper, .inverted):after,
+						&.flipped.flipping:not(.inverted).grid-wrapper > .inner-content {						
+							background-color: rgb(var(--cell-color-shade));
+							transition: transform var(--flip-duration),
+											outline-color calc(var(--flip-duration) / 2),
+											background-color var(--flip-duration);
+						}
+						
+						&.flipping:not(.grid-wrapper, .inverted, .flipped):after,
+						&.flipping:not(.inverted, .flipped).grid-wrapper > .inner-content {						
+							background-color: rgb(var(--cell-color));
+							transition: transform var(--flip-duration),
+											outline-color calc(var(--flip-duration) / 2),
+											background-color var(--flip-duration);
+						}
+						
+						&.flipping.inverted:not(.grid-wrapper, .flipped):after,
+						&.flipping.inverted:not(.flipped).grid-wrapper > .inner-content {						
+							background-color: rgb(var(--cell-color-shade));
+							transition: transform var(--flip-duration),
+											outline-color calc(var(--flip-duration) / 2),
+											background-color calc(var(--flip-duration) * 0.5);
+						}
+
+						&.grid-wrapper {
+							outline: solid 2px rgba(255, 0, 0, 0);
+							background-color: transparent;
+							transition: outline-color 0.8s;
+
 							&::after {
 								content: "";
 								position: absolute;
-								display: block;
-								transform: translateZ(5px);
-								width: 70%;
-								height: 70%;
-								margin: 15%;
-								background: var(--bg-url) no-repeat top left;
-								background-size: cover;
-							}
-							
-							&::before {
-								transform: translateZ(-1px) scaleX(-1);
-								background-position-x: right;
-
-								filter: drop-shadow(0px 0px 0px #0000004d);
-							
-								transition: transform 0.5s, filter 0.5s;
-								transform-timing-function: ease-in-out;
-							}
-							&::after {
-								transform: translateZ(1px);
-							}
-						}
-
-						&:hover > .inner-content::before {
-							transition-delay: 0.35s;
-							transform: translateZ(-30px) scaleX(-1);
-							filter: drop-shadow(30px 30px 10px #0000004d);
-						}
-
-						
-						& > .inner-content.cell-display {
-							&::before,
-							&::after {
-								margin: 0;
+								top: 0;
+								left: 0;
 								width: 100%;
 								height: 100%;
-								background-position-x: var(--bg-offsetX, 0);
-								background-position-y: var(--bg-offsetY, 0);
+								transition: box-shadow 0.8s;
+								transition-delay: 0s;
+								box-shadow: inset 5px 0 0px 2px rgba(0, 0, 0, 0);
+							}
+
+							&:hover {
+								outline-color:rgba(200, 200, 200, 1);
+
+								&:after {
+									transition-delay: 0.8s;
+									box-shadow: inset 0 0 35px 0px rgba(0, 0, 0, 0.1);
+								}
+							}
+
+							& > .inner-content {
+								transform-style: preserve-3d;
+								width: 100%;
+								height: 100%;
+								top: 0;
+								left: 0;
+								pointer-events: none;
+
+								&::before,
+								&::after {
+									content: "";
+									position: absolute;
+									display: block;
+									transform: translateZ(5px);
+									width: 70%;
+									height: 70%;
+									margin: 15%;
+									background: var(--bg-url) no-repeat top left;
+									background-size: cover;
+								}
+								
+								&::before {
+									transform: translateZ(-1px) scaleX(-1);
+									background-position-x: right;
+
+									filter: drop-shadow(0px 0px 0px #0000004d);
+								
+									transition: transform 0.5s, filter 0.5s;
+									transform-timing-function: ease-in-out;
+								}
+								&::after {
+									transform: translateZ(1px);
+								}
+							}
+
+							&:hover > .inner-content::before {
+								transition-delay: 0.35s;
+								transform: translateZ(-30px) scaleX(-1);
+								filter: drop-shadow(30px 30px 10px #0000004d);
+							}
+
+							
+							& > .inner-content.cell-display {
+								&::before,
+								&::after {
+									margin: 0;
+									width: 100%;
+									height: 100%;
+									background-position-x: var(--bg-offsetX, 0);
+									background-position-y: var(--bg-offsetY, 0);
+								}
+							}
+						}
+
+						& > .standing-text {
+							--standing-text-size: 3.5rem;
+
+							position: absolute;
+							bottom: 0;
+							left: 0;
+							width: max-content;
+							pointer-events: none;
+
+							font-size: var(--standing-text-size);
+							font-weight: bold;
+							text-wrap: nowrap;
+
+							text-shadow: -2px -2px 0rem rgb(180, 180, 180);
+											/* -4px -4px 0rem rgb(180, 180, 180); */
+
+							transform-origin: bottom left;
+							transform: translateZ(-8px) rotateX(-90deg) rotateY(90deg);
+						}
+
+						& > .lineup-wrapper {
+							position: absolute;
+							display: flex;
+							flex-wrap: nowrap;
+							top: 0;
+							left: 0;
+							pointer-events: none;
+							transform: translateZ(1px) scale(var(--lineup-scale, 1));
+							transform-origin: top left;
+							transform-style: preserve-3d;
+
+							& > img {
+								position: relative;						
+								top: var(--lineup-img-offsetY, 0);
+								margin-left: var(--lineup-img-offsetX, 0);
+								/* transition: transform 0.5s, filter 0.5s; */
+								transform: translateZ(var(--lineup-img-offsetZ, 0));
+								filter: drop-shadow(calc(var(--lineup-img-offsetZ, 0) * 3.6) calc(var(--lineup-img-offsetZ, 0) * 3.6) calc(var(--lineup-img-offsetZ, 0) * 0.7) #0000002f);
 							}
 						}
 					}
 
-					& > .standing-text {
-						--standing-text-size: 3.5rem;
+					& > button.grid-cell.grid-wrapper {
+						cursor: pointer;
 
-						position: absolute;
-						bottom: 0;
-						left: 0;
-						width: max-content;
-						pointer-events: none;
-
-						font-size: var(--standing-text-size);
-						font-weight: bold;
-						text-wrap: nowrap;
-
-						text-shadow: -2px -2px 0rem rgb(180, 180, 180);
-										/* -4px -4px 0rem rgb(180, 180, 180); */
-
-						transform-origin: bottom left;
-						transform: translateZ(-8px) rotateX(-90deg) rotateY(90deg);
-					}
-
-					& > .lineup-wrapper {
-						position: absolute;
-						display: flex;
-						flex-wrap: nowrap;
-						top: 0;
-						left: 0;
-						pointer-events: none;
-						transform: translateZ(1px) scale(var(--lineup-scale, 1));
-						transform-origin: top left;
-						transform-style: preserve-3d;
-
-						& > img {
-							position: relative;						
-							top: var(--lineup-img-offsetY, 0);
-							margin-left: var(--lineup-img-offsetX, 0);
-							/* transition: transform 0.5s, filter 0.5s; */
-							transform: translateZ(var(--lineup-img-offsetZ, 0));
-							filter: drop-shadow(calc(var(--lineup-img-offsetZ, 0) * 3.6) calc(var(--lineup-img-offsetZ, 0) * 3.6) calc(var(--lineup-img-offsetZ, 0) * 0.7) #0000002f);
+						& > .inner-content:not(#\9) {
+							transition: transform 0.6s,
+											outline-color 0.3s,
+											background-color 0.3s;
 						}
-					}
-				}
 
-				& > button.grid-cell.grid-wrapper {
-					cursor: pointer;
-
-					& > .inner-content {
-						transition: transform 0.6s;
-					}
-
-					& > .standing-text {
-						width: 100%;
-						transform-style: preserve-3d;
-						text-transform: uppercase;
-						font-size: 1.7rem;
-						text-align: center;
-						font-weight: 300;
-						text-shadow: 2px -2px 0rem rgb(180, 180, 180);
-						transform: translateZ(-8px) rotateX(-90deg) rotateY(0deg);
-						
-						& > span {
-							opacity: 0;
-							display: inline-block;
-							transition: transform 0.4s, opacity 0.4s;
-							transform: translateY(3rem);
-							transition-delay: calc(var(--transition-delay, 0) * 0.05s);
+						& > .standing-text {
+							width: 100%;
+							transform-style: preserve-3d;
+							text-transform: uppercase;
+							font-size: 1.7rem;
+							text-align: center;
+							font-weight: 300;
+							text-shadow: 2px -2px 0rem rgb(180, 180, 180);
+							transform: translateZ(-8px) rotateX(-90deg) rotateY(0deg);
+							
+							& > span {
+								opacity: 0;
+								display: inline-block;
+								transition: transform 0.4s, opacity 0.4s;
+								transform: translateY(3rem);
+								transition-delay: calc(var(--transition-delay, 0) * 0.05s);
+							}
 						}
-					}
 
-					&:hover > .standing-text > span {
-						opacity: 1;
-						transform: translateY(-8px);
-						transition-delay: calc(var(--transition-delay, 0) * 0.05s + 0.5s);
+						&:hover > .standing-text > span {
+							opacity: 1;
+							transform: translateY(-8px);
+							transition-delay: calc(var(--transition-delay, 0) * 0.05s + 0.5s);
+						}
 					}
 				}
 			}
