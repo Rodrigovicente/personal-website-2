@@ -1,5 +1,5 @@
 ---
-
+const { id } = Astro.props
 ---
 
 <script>
@@ -14,10 +14,18 @@
 
 	let cellList: GridCell[] = []
 
-	function debounce(func: Function, wait: number = 100) {
+	let g_isResizing = false
+
+	const g_setRezingTrue = () => {
+		g_isResizing = true
+	}
+
+	function debounce(func: Function, immediate?: Function | null, wait: number = 100) {
 		let timeout: number
 
 		return (...args: any[]) => {
+			if(immediate) immediate()
+
 			clearTimeout(timeout)
 			timeout = setTimeout(() => func(...args), wait)
 		}
@@ -25,12 +33,16 @@
 
 	introElem?.style.setProperty("--flip-duration", `${flipDuration/1000}s`)
 
-	const introResizeObserver = new ResizeObserver(debounce(handleIntroResize))
+	const introResizeObserver = new ResizeObserver(debounce(handleIntroResize, g_setRezingTrue))
 
 	function handleIntroResize(entries: ResizeObserverEntry[]) {
 		const introRect = entries[0].contentRect
 		const introWidth = introRect.width
 		const introHeight = introRect.height
+
+		setTimeout(() => {
+			g_isResizing = false
+		}, 100)
 		
 		console.log(introWidth, introHeight)
 
@@ -403,7 +415,7 @@
 			}
 
 			introContentElem?.addEventListener("pointermove", (e: PointerEvent) => {
-
+				if(g_isResizing) return
 				this.setPointerPosition(e.clientX, e.clientY)
 			})
 			
@@ -525,7 +537,7 @@
 	
 </script>
 
-<div id="intro">
+<div id={id} class="intro page">
 	<div class="intro-content">
 		<div id="grid">
 		</div>
@@ -534,7 +546,7 @@
 
 <style>
 
-	#intro {
+	.intro {
 
 		--cell-size: 128px;
 		--cell-border-color: rgb(236, 236, 236);
@@ -550,6 +562,7 @@
 		--cell-color-shade: 237, 237, 237;
 
 		background-color: rgb(var(--cell-color));
+		width: 100%;
 
 		& > .intro-content {
 
@@ -598,14 +611,18 @@
 				.grid-row {
 					/* outline: solid 1px green; */
 
-					display: grid;
 					position: relative;
+					display: grid;
+					width: max-content;
 					grid-auto-flow: column;
 					grid-template-columns: repeat(auto-fit, var(--cell-size));
 					transform-style: preserve-3d;
 					pointer-events: none;
 
+					margin-left: calc(var(--cell-size) / -4); /* to center */
+
 					margin-top: calc(var(--cell-size) / -2);
+					
 					&:nth-child(even) {
 						left: calc(var(--cell-size) / -2);
 

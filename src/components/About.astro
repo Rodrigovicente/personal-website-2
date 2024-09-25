@@ -1,0 +1,25 @@
+---
+const { id } = Astro.props
+---
+
+
+<div id={id} class={"about" + (id=='about2' ? ' large' : '')}>
+	<h2>ABOUT {id}</h2>
+	<p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Facilis in obcaecati qui possimus voluptates dolorem assumenda consequuntur, eius, accusamus expedita nam itaque eos excepturi distinctio, nobis beatae sint atque eaque?</p>
+</div>
+
+<style>
+	.about {
+		overflow: hidden;
+		height: 100dvh;
+		padding: 2rem;
+		box-sizing: border-box;
+		background-color: #817fff;
+		background-image: linear-gradient(#817fff, #7fbbff);
+
+		&.large {
+			height: 150vh;
+			background-image: linear-gradient(#ffcc7f, #65eca2);
+		}
+	}
+</style>
